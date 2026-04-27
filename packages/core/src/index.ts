@@ -7,11 +7,10 @@ export { ConfigLoader, DEFAULT_CONFIG } from './config/ConfigLoader.js'
 // 扫描器
 export { ChineseScanner } from './scanner/ChineseScanner.js'
 export { UntranslatableDetector } from './scanner/UntranslatableDetector.js'
-export { DuplicateDetector } from './scanner/DuplicateDetector.js'
 
 // 翻译
 export { ApiTranslator } from './translator/ApiTranslator.js'
-export { CacheManager } from './translator/CacheManager.js'
+export { CacheManager } from './cache/CacheManager.js'
 
 // 质量检查
 export { ChinglishChecker } from './quality/ChinglishChecker.js'
@@ -40,4 +39,11 @@ export type {
   ScanOptions,
   ExclusionRange,
   Position,
+  TranslationConfig,
+  TranslationResult,
+  CacheConfig,
+  ValidationIssue,
+  CoverageReport,
+  LayoutIssue,
 } from './types.js'
+
