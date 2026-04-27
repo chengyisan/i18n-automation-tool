@@ -128,14 +128,51 @@ isUrl(text) → boolean
 - 混合场景（3 个）
 - 处理建议（4 个）
 
+### 6. DuplicateDetector 实现（补充）
+**文件**: `packages/core/src/scanner/DuplicateDetector.ts`
+
+**核心功能**:
+- 检测项目中重复出现的中文字符串
+- 支持跨文件/单文件检测模式
+- 可配置的出现次数阈值和最小长度
+- 按出现次数降序排序
+- 忽略空字符串和短字符串
+- 语义化 key 生成
+
+**关键算法**:
+```typescript
+// 字符串聚合
+aggregateStrings() → Map<string, Location[]>
+
+// 重复检测
+detectDuplicates() → DuplicateKey[]
+
+// Key 生成
+generateKey(text) → string
+```
+
+**测试覆盖**: 9 个测试用例
+- 基本重复检测（1 个）
+- 跨文件检测（1 个）
+- 阈值过滤（1 个）
+- 短字符串过滤（1 个）
+- 排序验证（1 个）
+- 空白字符处理（1 个）
+- 位置信息（1 个）
+- 复杂场景（1 个）
+- Key 生成（1 个）
+
+**补充说明**:
+此模块在 Phase 1 初期被遗漏，后续补充完成。用于识别可以提取为共享翻译的重复文本，支持 monorepo 中的共享翻译检测。
+
 ---
 
 ## 📊 测试结果
 
 ```
-Test Files  2 passed (2)
-Tests       39 passed (39)
-Duration    ~500ms
+Test Files  3 passed (3)
+Tests       48 passed (48)
+Duration    ~600ms
 ```
 
 **测试覆盖率**: 100%
@@ -143,6 +180,7 @@ Duration    ~500ms
 **测试文件**:
 - `src/__tests__/ChineseScanner.test.ts` - 20 个测试
 - `src/__tests__/UntranslatableDetector.test.ts` - 19 个测试
+- `src/__tests__/DuplicateDetector.test.ts` - 9 个测试
 
 ---
 
@@ -155,21 +193,24 @@ packages/core/
 │   │   └── ConfigLoader.ts          (220 行)
 │   ├── scanner/
 │   │   ├── ChineseScanner.ts        (350 行)
-│   │   └── UntranslatableDetector.ts (260 行)
+│   │   ├── UntranslatableDetector.ts (260 行)
+│   │   └── DuplicateDetector.ts     (180 行)
 │   ├── __tests__/
 │   │   ├── ChineseScanner.test.ts   (230 行)
-│   │   └── UntranslatableDetector.test.ts (190 行)
-│   ├── types.ts                     (161 行)
-│   └── index.ts                     (40 行)
+│   │   ├── UntranslatableDetector.test.ts (190 行)
+│   │   └── DuplicateDetector.test.ts (120 行)
+│   ├── types.ts                     (193 行)
+│   └── index.ts                     (43 行)
 └── package.json
 
 docs/specs/core/
 ├── ConfigLoader.md                  (200 行)
 ├── ChineseScanner.md                (350 行)
-└── UntranslatableDetector.md        (280 行)
+├── UntranslatableDetector.md        (280 行)
+└── DuplicateDetector.md             (320 行)
 ```
 
-**总代码量**: ~2,280 行（含注释和测试）
+**总代码量**: ~2,900 行（含注释和测试）
 
 ---
 
@@ -315,14 +356,15 @@ if (scriptStart > scriptEnd || styleStart > styleEnd) {
 
 ## ✅ 验收标准
 
-- [x] 所有测试通过（39/39）
+- [x] 所有测试通过（48/48）
 - [x] 类型定义完整
 - [x] 代码注释清晰
 - [x] 规格文档完善
 - [x] 无 TypeScript 错误
 - [x] 无 ESLint 警告
 - [x] 使用标准 locale code
+- [x] DuplicateDetector 补充完成
 
 ---
 
-**总结**: Phase 1 成功完成了 core 包的基础扫描和检测功能，为后续的 AST 解析和代码替换奠定了坚实的基础。代码质量高，测试覆盖全面，设计灵活可扩展。
+**总结**: Phase 1 成功完成了 core 包的基础扫描和检测功能（包括后续补充的 DuplicateDetector），为后续的 AST 解析和代码替换奠定了坚实的基础。代码质量高，测试覆盖全面，设计灵活可扩展。

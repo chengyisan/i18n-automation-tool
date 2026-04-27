@@ -7,6 +7,7 @@ export { ConfigLoader, DEFAULT_CONFIG } from './config/ConfigLoader.js'
 // 扫描器
 export { ChineseScanner } from './scanner/ChineseScanner.js'
 export { UntranslatableDetector } from './scanner/UntranslatableDetector.js'
+export { DuplicateDetector } from './scanner/DuplicateDetector.js'
 
 // 翻译
 export { ApiTranslator } from './translator/ApiTranslator.js'
