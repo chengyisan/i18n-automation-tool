@@ -158,3 +158,35 @@ export interface I18nToolConfig {
     batchTranslation: { enabled: boolean; batchSize: number }
   }
 }
+
+/** 配置验证结果 */
+export interface ConfigValidationResult {
+  valid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
+/** 扫描选项 */
+export interface ScanOptions {
+  /** 文件内容 */
+  content: string
+  /** 文件路径 */
+  filePath: string
+  /** 排除模式 */
+  excludePatterns?: RegExp[]
+  /** 是否包含注释中的中文 */
+  includeComments?: boolean
+}
+
+/** 排除区域 */
+export interface ExclusionRange {
+  start: number
+  end: number
+  reason: string
+}
+
+/** 位置信息 */
+export interface Position {
+  line: number
+  column: number
+}

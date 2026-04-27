@@ -1,19 +1,43 @@
 // @i18n-tool/core
 // 核心层入口 — 框架无关的扫描、翻译、质量检查、验证能力
 
-export { ChineseScanner } from './scanner/chineseScanner.js'
-export { UntranslatableDetector } from './scanner/untranslatableDetector.js'
-export { DuplicateDetector } from './scanner/duplicateDetector.js'
+// 配置
+export { ConfigLoader, DEFAULT_CONFIG } from './config/ConfigLoader.js'
 
-export { ApiTranslator } from './translator/apiTranslator.js'
-export { CacheManager } from './translator/cacheManager.js'
+// 扫描器
+export { ChineseScanner } from './scanner/ChineseScanner.js'
+export { UntranslatableDetector } from './scanner/UntranslatableDetector.js'
+export { DuplicateDetector } from './scanner/DuplicateDetector.js'
 
-export { ChinglishChecker } from './quality/chinglishChecker.js'
-export { RedundancyChecker } from './quality/redundancyChecker.js'
-export { RtlChecker } from './quality/rtlChecker.js'
+// 翻译
+export { ApiTranslator } from './translator/ApiTranslator.js'
+export { CacheManager } from './translator/CacheManager.js'
 
-export { ConfigValidator } from './validator/configValidator.js'
-export { CoverageReporter } from './validator/coverageReporter.js'
-export { LayoutChecker } from './validator/layoutChecker.js'
+// 质量检查
+export { ChinglishChecker } from './quality/ChinglishChecker.js'
+export { RedundancyChecker } from './quality/RedundancyChecker.js'
+export { RtlChecker } from './quality/RtlChecker.js'
 
-export type { ScanResult, TranslationEntry, QualityIssue, ValidationResult } from './types.js'
+// 验证
+export { ConfigValidator } from './validator/ConfigValidator.js'
+export { CoverageReporter } from './validator/CoverageReporter.js'
+export { LayoutChecker } from './validator/LayoutChecker.js'
+
+// 类型导出
+export type {
+  ScanResult,
+  HardcodedString,
+  UntranslatableItem,
+  DuplicateKey,
+  TranslationEntry,
+  QualityIssue,
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  CoverageStats,
+  I18nToolConfig,
+  ConfigValidationResult,
+  ScanOptions,
+  ExclusionRange,
+  Position,
+} from './types.js'
