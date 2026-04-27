@@ -1,0 +1,27 @@
+{
+  "name": "i18n-automation-tool",
+  "version": "0.1.0",
+  "private": true,
+  "description": "国际化自动化工具 — 扫描、替换、翻译、验证一站式 i18n 工具链",
+  "author": "srcheng4",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0"
+  }
+}

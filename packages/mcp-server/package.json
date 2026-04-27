@@ -1,0 +1,23 @@
+{
+  "name": "@i18n-tool/mcp-server",
+  "version": "0.1.0",
+  "description": "i18n 自动化工具 MCP Server — 为 Claude Code 提供 i18n 工具",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@i18n-tool/core": "workspace:*",
+    "@i18n-tool/adapter-vue3": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
