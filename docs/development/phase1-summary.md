@@ -350,7 +350,7 @@ if (scriptStart > scriptEnd || styleStart > styleEnd) {
 - [BCP 47 Language Tags](https://www.rfc-editor.org/rfc/bcp/bcp47.txt)
 - [Unicode 中文字符范围](https://www.unicode.org/charts/PDF/U4E00.pdf)
 - [vue-i18n 文档](https://vue-i18n.intlify.dev/)
-- [参考项目 energy_2.2.0_i18n 分支](D:\workSpace\spark_industry_master_frontends)
+- 参考实际 i18n 改造项目的经验
 
 ---
 
