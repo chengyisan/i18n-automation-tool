@@ -45,7 +45,7 @@ class GoogleTranslateProvider implements TranslationProvider {
       throw new Error(`Google Translate API error: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     return data.data.translations[0].translatedText;
   }
 
@@ -69,7 +69,7 @@ class GoogleTranslateProvider implements TranslationProvider {
       throw new Error(`Google Translate API error: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     return data.data.translations.map((t: { translatedText: string }) => t.translatedText);
   }
 }
@@ -103,7 +103,7 @@ class DeepLProvider implements TranslationProvider {
       throw new Error(`DeepL API error: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     return data.translations[0].text;
   }
 
@@ -129,7 +129,7 @@ class DeepLProvider implements TranslationProvider {
       throw new Error(`DeepL API error: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     return data.translations.map((t: { text: string }) => t.text);
   }
 }

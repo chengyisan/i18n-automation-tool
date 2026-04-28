@@ -22,6 +22,7 @@ export { RtlChecker } from './quality/RtlChecker.js'
 export { ConfigValidator } from './validator/ConfigValidator.js'
 export { CoverageReporter } from './validator/CoverageReporter.js'
 export { LayoutChecker } from './validator/LayoutChecker.js'
+export { checkKeyIntegrity } from './validator/KeyIntegrityChecker.js'
 
 // 类型导出
 export type {
@@ -46,5 +47,6 @@ export type {
   ValidationIssue,
   CoverageReport,
   LayoutIssue,
+  KeyIntegrityResult,
 } from './types.js'
 

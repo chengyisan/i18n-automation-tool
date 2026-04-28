@@ -82,7 +82,7 @@ export class DuplicateDetector {
    * 将扫描结果中的字符串添加到 map
    */
   private addStringsToMap(result: ScanResult, map: Map<string, Location[]>): void {
-    for (const str of result.strings) {
+    for (const str of result.hardcodedStrings) {
       const text = str.text.trim();
 
       // 忽略空字符串
@@ -96,7 +96,7 @@ export class DuplicateDetector {
 
       map.get(text)!.push({
         filePath: result.filePath,
-        line: str.position.line,
+        line: str.line,
       });
     }
   }

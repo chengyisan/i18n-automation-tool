@@ -9,10 +9,12 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '请选择', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '请选择', position: { line: 20, column: 8 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '请选择', line: 10, column: 5, context: 'template' },
+          { text: '请选择', line: 20, column: 8, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -28,15 +30,21 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [{ text: '保存', position: { line: 10, column: 5 }, context: 'template' }],
+        hardcodedStrings: [{ text: '保存', line: 10, column: 5, context: 'template' }],
+        untranslatables: [],
+        duplicates: [],
       },
       {
         filePath: 'b.vue',
-        strings: [{ text: '保存', position: { line: 15, column: 3 }, context: 'template' }],
+        hardcodedStrings: [{ text: '保存', line: 15, column: 3, context: 'template' }],
+        untranslatables: [],
+        duplicates: [],
       },
       {
         filePath: 'c.vue',
-        strings: [{ text: '保存', position: { line: 8, column: 2 }, context: 'template' }],
+        hardcodedStrings: [{ text: '保存', line: 8, column: 2, context: 'template' }],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -55,12 +63,14 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '确定', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 11, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 12, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 13, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '确定', line: 10, column: 5, context: 'template' },
+          { text: '取消', line: 11, column: 5, context: 'template' },
+          { text: '取消', line: 12, column: 5, context: 'template' },
+          { text: '取消', line: 13, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -75,12 +85,14 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '是', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '是', position: { line: 11, column: 5 }, context: 'template' },
-          { text: '否', position: { line: 12, column: 5 }, context: 'template' },
-          { text: '否', position: { line: 13, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '是', line: 10, column: 5, context: 'template' },
+          { text: '是', line: 11, column: 5, context: 'template' },
+          { text: '否', line: 12, column: 5, context: 'template' },
+          { text: '否', line: 13, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -93,17 +105,19 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '保存', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '保存', position: { line: 11, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 12, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 13, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 14, column: 5 }, context: 'template' },
-          { text: '删除', position: { line: 15, column: 5 }, context: 'template' },
-          { text: '删除', position: { line: 16, column: 5 }, context: 'template' },
-          { text: '删除', position: { line: 17, column: 5 }, context: 'template' },
-          { text: '删除', position: { line: 18, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '保存', line: 10, column: 5, context: 'template' },
+          { text: '保存', line: 11, column: 5, context: 'template' },
+          { text: '取消', line: 12, column: 5, context: 'template' },
+          { text: '取消', line: 13, column: 5, context: 'template' },
+          { text: '取消', line: 14, column: 5, context: 'template' },
+          { text: '删除', line: 15, column: 5, context: 'template' },
+          { text: '删除', line: 16, column: 5, context: 'template' },
+          { text: '删除', line: 17, column: 5, context: 'template' },
+          { text: '删除', line: 18, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -122,11 +136,13 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '  ', position: { line: 11, column: 5 }, context: 'template' },
-          { text: '\n', position: { line: 12, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '', line: 10, column: 5, context: 'template' },
+          { text: '  ', line: 11, column: 5, context: 'template' },
+          { text: '\n', line: 12, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -139,10 +155,12 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'components/Button.vue',
-        strings: [
-          { text: '提交', position: { line: 25, column: 10 }, context: 'template' },
-          { text: '提交', position: { line: 50, column: 15 }, context: 'script' },
+        hardcodedStrings: [
+          { text: '提交', line: 25, column: 10, context: 'template' },
+          { text: '提交', line: 50, column: 15, context: 'script' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -162,24 +180,30 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '保存', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 11, column: 5 }, context: 'template' },
-          { text: '删除', position: { line: 12, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '保存', line: 10, column: 5, context: 'template' },
+          { text: '取消', line: 11, column: 5, context: 'template' },
+          { text: '删除', line: 12, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
       {
         filePath: 'b.vue',
-        strings: [
-          { text: '保存', position: { line: 20, column: 5 }, context: 'template' },
-          { text: '取消', position: { line: 21, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '保存', line: 20, column: 5, context: 'template' },
+          { text: '取消', line: 21, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
       {
         filePath: 'c.vue',
-        strings: [
-          { text: '保存', position: { line: 30, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '保存', line: 30, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
@@ -194,10 +218,12 @@ describe('DuplicateDetector', () => {
     const scanResults: ScanResult[] = [
       {
         filePath: 'a.vue',
-        strings: [
-          { text: '请选择日期', position: { line: 10, column: 5 }, context: 'template' },
-          { text: '请选择日期', position: { line: 20, column: 5 }, context: 'template' },
+        hardcodedStrings: [
+          { text: '请选择日期', line: 10, column: 5, context: 'template' },
+          { text: '请选择日期', line: 20, column: 5, context: 'template' },
         ],
+        untranslatables: [],
+        duplicates: [],
       },
     ];
 
