@@ -1,6 +1,6 @@
 {
   "name": "@i18n-tool/core",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "i18n 自动化工具核心层 — 扫描、翻译、质量检查、验证（框架无关）",
   "type": "module",
   "main": "dist/index.js",

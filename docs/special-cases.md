@@ -1,7 +1,7 @@
 # 特殊场景处理指南
 
 > 国际化自动化工具 - 特殊场景和边界情况处理  
-> 最后更新：2026-04-27
+> 最后更新：2026-04-28
 
 ## 目录
 
@@ -9,6 +9,9 @@
 - [2. 公共翻译统一管理](#2-公共翻译统一管理)
 - [3. 语种特殊化处理](#3-语种特殊化处理)
 - [4. 边界情况处理](#4-边界情况处理)
+- [5. 多语言模板拼接空格](#5-多语言模板拼接空格)
+- [6. CSS 布局按语言动态调整](#6-css-布局按语言动态调整)
+- [7. 后端数据多语种处理](#7-后端数据多语种处理)
 
 ---
 
@@ -323,6 +326,98 @@ const typeMap = {
 - CSS 固定宽度检测
 - 表格列宽检测
 - 自动翻译集成
+
+---
+
+## 5. 多语言模板拼接空格
+
+### 5.1 问题描述
+
+中文不需要词间空格，但英文/西班牙语/阿拉伯语等语言需要。当 template 中多个 `{{ t() }}` 拼接时，非中文语言会出现单词粘连。
+
+此外，CSS flex 容器会 trim 普通空格，需要使用 `\u00a0`（non-breaking space）。
+
+### 5.2 解决方案
+
+```vue
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+
+// 非 flex 容器用普通空格
+const localeSep = computed(() => locale.value === 'zh-CN' ? '' : ' ')
+// flex 容器用 non-breaking space（防止被 trim）
+const localeSepNbsp = computed(() => locale.value === 'zh-CN' ? '' : '\u00a0')
+</script>
+```
+
+### 5.3 工具检测规则
+
+- 检测 template 中相邻的 `{{ t() }}` 或 `{{ $t() }}` 表达式
+- 检测父元素是否为 flex 容器
+- 生成建议：添加 `localeSep` 或 `localeSepNbsp`
+
+---
+
+## 6. CSS 布局按语言动态调整
+
+### 6.1 问题描述
+
+同样的内容，英文通常比中文长 30-50%，阿拉伯语/西班牙语更长。固定宽度的 CSS 会导致长语种文本被截断。
+
+### 6.2 常见场景
+
+| 场景 | 问题 | 解决方案 |
+|------|------|----------|
+| 搜索框 placeholder | 长语种被截断 | computed style：中文固定宽度，长语种 min/max 自适应 |
+| 表单 label | 宽度不够 | 动态 class：`.locale-${locale}` + CSS 覆盖 |
+| 按钮文本 | 溢出 | 使用 `white-space: nowrap` + `min-width` |
+| 表格列宽 | 列头被截断 | 使用 `min-width` 代替 `width` |
+
+### 6.3 工具检测规则
+
+- 检测 CSS 中的固定宽度（`width: Npx`），提示考虑长语种适配
+- 检测 `style="width: ..."` 内联样式
+- 检测 Element Plus 组件的 `width` 属性
+
+---
+
+## 7. 后端数据多语种处理
+
+### 7.1 问题描述
+
+后端返回的数据可能包含语种相关字段（如 displayName、description），切换语种后需要重新请求接口获取对应语言的数据。
+
+### 7.2 适用场景
+
+- 级联选择器的 displayName（后端根据 Accept-Language 返回）
+- 模板列表的 name/description
+- 菜单名称（后端动态返回）
+- AI 生成的摘要/模板
+
+### 7.3 解决方案
+
+```vue
+<script setup>
+import { watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+
+// 监听 locale 变化，重新请求接口
+watch(locale, () => {
+  fetchMenuList()
+  fetchTemplateList()
+})
+</script>
+```
+
+### 7.4 工具检测规则
+
+- 检测 `onMounted` 中的 API 请求，提示是否需要监听 locale 变化
+- 检测 `watch(locale)` 是否已存在
+- 生成建议清单
 
 ---
 
