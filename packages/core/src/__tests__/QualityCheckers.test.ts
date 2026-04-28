@@ -34,6 +34,39 @@ describe('ChinglishChecker', () => {
     const issues = checker.check('This is a well-written sentence');
     expect(issues.length).toBe(0);
   });
+
+  // i18n 场景高频中式英语测试
+  it('应该检测 "please input" 表达', () => {
+    const issues = checker.check('Please input your name');
+    expect(issues.length).toBe(1);
+    expect(issues[0].type).toBe('chinglish');
+    expect(issues[0].suggestion).toContain('Enter');
+  });
+
+  it('应该检测 "no data" 表达', () => {
+    const issues = checker.check('No data available');
+    expect(issues.length).toBe(1);
+    expect(issues[0].message).toContain('no data');
+    expect(issues[0].suggestion).toContain('No results');
+  });
+
+  it('应该检测 "modify" 按钮文案', () => {
+    const issues = checker.check('Click to modify');
+    expect(issues.length).toBe(1);
+    expect(issues[0].suggestion).toContain('Edit');
+  });
+
+  it('应该检测 "new add" 表达', () => {
+    const issues = checker.check('New add item');
+    expect(issues.length).toBe(1);
+    expect(issues[0].suggestion).toContain('Add');
+  });
+
+  it('应该检测 "add new" 表达', () => {
+    const issues = checker.check('Add new record');
+    expect(issues.length).toBe(1);
+    expect(issues[0].suggestion).toContain('Create');
+  });
 });
 
 describe('RedundancyChecker', () => {
@@ -59,6 +92,48 @@ describe('RedundancyChecker', () => {
   it('对于无冗余的文本不应报告问题', () => {
     const issues = checker.check('This is a clear and concise message');
     expect(issues.length).toBe(0);
+  });
+
+  // --- 英语 i18n 场景冗余 ---
+  it('应该检测 "please input" i18n 冗余', () => {
+    const issues = checker.check('Please input your name');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.type === 'redundancy' && i.suggestion.includes('Enter'))).toBe(
+      true
+    );
+  });
+
+  // --- 西班牙语冗余 ---
+  it('应该检测西班牙语 "Por favor" 开头', () => {
+    const issues = checker.check('Por favor ingrese su nombre');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.message.includes('Por favor'))).toBe(true);
+  });
+
+  // --- 阿拉伯语冗余 ---
+  it('应该检测阿拉伯语 "يرجى" 开头', () => {
+    const issues = checker.check('يرجى إدخال اسمك');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.message.includes('يرجى'))).toBe(true);
+  });
+
+  // --- 通用规则 ---
+  it('应该检测前导空格', () => {
+    const issues = checker.check('  Hello world');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.message.includes('前导空格'))).toBe(true);
+  });
+
+  it('应该检测尾随空格', () => {
+    const issues = checker.check('Hello world  ');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.message.includes('尾随空格'))).toBe(true);
+  });
+
+  it('应该检测装饰性波浪号 ~', () => {
+    const issues = checker.check('Welcome~');
+    expect(issues.length).toBeGreaterThanOrEqual(1);
+    expect(issues.some((i) => i.message.includes('波浪号'))).toBe(true);
   });
 });
 

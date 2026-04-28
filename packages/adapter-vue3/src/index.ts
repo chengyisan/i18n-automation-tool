@@ -4,6 +4,7 @@
 export { VueSfcParser } from './parser/vueSfcParser.js'
 export { CodeReplacer } from './replacer/codeReplacer.js'
 export { ReactiveChecker } from './checker/reactiveChecker.js'
+export { TemplateConcatChecker } from './checker/templateConcatChecker.js'
 export { ElementPlusAdapter } from './ui-lib/elementPlusAdapter.js'
 
-export type { ParsedVueSfc, ReplacementResult, ReactiveIssue, ElementPlusIssue } from './types.js'
+export type { ParsedVueSfc, ReplacementResult, ReactiveIssue, TemplateConcatIssue, ElementPlusIssue } from './types.js'
