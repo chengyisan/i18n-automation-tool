@@ -71,6 +71,48 @@ export class ChinglishChecker {
       message: '避免使用 "hear" 表示听音乐',
       suggestion: '使用 listen to',
     },
+    // i18n 场景高频中式英语
+    {
+      pattern: /\bplease\s+input\b/gi,
+      message: '避免使用 "please input"（中文"请输入"的直译）',
+      suggestion: '使用 Enter',
+    },
+    {
+      pattern: /\bplease\s+confirm\s+whether\s+to\b/gi,
+      message: '避免使用 "please confirm whether to"',
+      suggestion: '直接用动词短语，如 Delete this item?',
+    },
+    {
+      // 排除 "please input" 避免重复匹配
+      pattern: /(?<!\bplease\s)\binput\s+[a-z]/gi,
+      message: '避免在 placeholder 中使用 "input"',
+      suggestion: '使用 Enter',
+    },
+    {
+      pattern: /\boperation\s+failed\b/gi,
+      message: '避免使用 "operation failed"',
+      suggestion: '使用 Failed 或具体错误描述',
+    },
+    {
+      pattern: /\bno\s+data\b/gi,
+      message: '避免使用 "no data"（中文"暂无数据"的直译）',
+      suggestion: '使用 No results 或 Nothing here',
+    },
+    {
+      pattern: /\bloading\s+data\b/gi,
+      message: '避免使用 "loading data"',
+      suggestion: '使用 Loading...',
+    },
+    {
+      pattern: /\bmodify\b/gi,
+      message: '避免在按钮文案中使用 "modify"（中文"修改"的直译）',
+      suggestion: '使用 Edit',
+    },
+    {
+      pattern: /\b(new\s+add|add\s+new)\b/gi,
+      message: '避免使用 "new add" 或 "add new"',
+      suggestion: '使用 Add 或 Create',
+    },
   ];
 
   /**

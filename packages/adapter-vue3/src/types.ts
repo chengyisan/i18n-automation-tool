@@ -60,7 +60,7 @@ export interface ReplacementResult {
 /** 响应式问题 */
 export interface ReactiveIssue {
   /** 问题类型 */
-  type: 'ref-with-t' | 'static-object-with-t' | 'top-level-t-assignment'
+  type: 'ref-with-t' | 'static-object-with-t' | 'top-level-t-assignment' | 'jsx-return-with-t'
   /** 文件路径 */
   filePath: string
   /** 行号 */
@@ -83,6 +83,20 @@ export interface ElementPlusIssue {
   line: number
   /** 问题描述 */
   message: string
+  /** 修复建议 */
+  suggestion: string
+}
+
+/** 模板拼接空格问题 */
+export interface TemplateConcatIssue {
+  /** 问题类型 */
+  type: 'template-concat-missing-space'
+  /** 文件路径 */
+  filePath: string
+  /** 行号 */
+  line: number
+  /** 问题代码 */
+  code: string
   /** 修复建议 */
   suggestion: string
 }

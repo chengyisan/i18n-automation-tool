@@ -1,6 +1,6 @@
 {
   "name": "@i18n-tool/adapter-vue3",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Vue 3 适配器 — AST 解析、代码替换、响应式检测",
   "type": "module",
   "main": "dist/index.js",

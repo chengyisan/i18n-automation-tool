@@ -38,6 +38,9 @@ export class LayoutChecker {
     // 检查固定高度
     issues.push(...this.checkFixedHeight(cssContent, filePath));
 
+    // 检查内联 style 中的固定宽度
+    issues.push(...this.checkInlineStyle(content, filePath));
+
     return issues;
   }
 
@@ -108,6 +111,36 @@ export class LayoutChecker {
           file: filePath,
           property: 'height',
           value: `${height}px`,
+        });
+      }
+    }
+
+    return issues;
+  }
+
+  /**
+   * 检查内联 style 中的固定宽度
+   */
+  private checkInlineStyle(content: string, filePath: string): LayoutIssue[] {
+    const issues: LayoutIssue[] = [];
+
+    // 匹配 style="..." 或 :style="..." 中的 width: Npx
+    const inlineStylePattern = /:?style\s*=\s*["']([^"']*width\s*:\s*(\d+)px[^"']*)["']/g;
+    const matches = content.matchAll(inlineStylePattern);
+
+    for (const match of matches) {
+      const width = parseInt(match[2]);
+
+      // 只报告较小的固定宽度
+      if (width < 500) {
+        issues.push({
+          type: 'fixed_width',
+          severity: 'warning',
+          message: `内联 style 固定宽度可能导致文本溢出: width: ${width}px`,
+          suggestion: '考虑使用 computed style 动态调整宽度，或使用 min-width/max-width',
+          file: filePath,
+          property: 'width',
+          value: `${width}px`,
         });
       }
     }

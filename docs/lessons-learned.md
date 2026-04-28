@@ -2,11 +2,11 @@
 
 **国际化自动化工具 - 从 152+ 次提交中总结的规则**
 
-**最后更新**: 2026-04-27
+**最后更新**: 2026-04-28
 
 ---
 
-基于 `energy_2.2.0_i18n` 分支的实际改造经验（152+ 次提交，5 个应用），总结以下规则和最佳实践。这些模式应固化到工具规则中。
+基于实际 i18n 改造项目的经验（160+ 次提交，5 个应用），总结以下规则和最佳实践。这些模式应固化到工具规则中。
 
 ---
 
@@ -217,8 +217,17 @@ const menuName = t(`menu.${item.id}`)  // item.id = 'data-management'
 | 语种 | 注意事项 |
 |------|----------|
 | 英语 | 避免中式英语，精简表达，去掉多余的 please/whether |
-| 西班牙语 | 去掉波浪号（¿¡）和多余感叹号，修正语法错误 |
-| 阿拉伯语 | RTL 拼接顺序、避免冗余表达、注意性别和数的一致性 |
+| 西班牙语 | 去掉波浪号（¿¡）和多余感叹号，修正动词单复数不匹配，修正拼接语法错误 |
+| 阿拉伯语 | RTL 拼接顺序、避免冗余表达（去掉 يرجى）、注意性别和数的一致性、方向词镜像（右→左） |
+
+**具体检测规则**:
+
+1. **冗余表达**: 英语 "Please input" → "Enter"，西班牙语 "Por favor" → 直接动词，阿拉伯语 "يرجى" → 直接动词
+2. **装饰性符号**: 去掉波浪号 `~`、过度感叹号 `!`、西班牙语倒问号/倒感叹号 `¿¡`
+3. **RTL 方向词错误**: 阿拉伯语中 "右下" 应为 "左下"（RTL 镜像），"右侧面板" 应为 "侧面板"
+4. **拼接语法错误**: 西班牙语动词单复数不匹配（如 referencePrefix 后接数字时）
+5. **前导/尾随空格**: 翻译值不应有前导或尾随空格
+6. **截断拼接优化**: 如 `todayUpdate` + `todayUpdateSuffix` 拼接时需考虑各语种语序
 
 ---
 
@@ -357,9 +366,193 @@ t('common.confirm')
 
 ---
 
+## 10. 多语言模板拼接空格处理
+
+**规则**: 非中文语言拼接时需要词间空格，但 flex 容器会 trim 普通空格
+
+**原因**: 英文等语言需要空格分隔单词，但 CSS flex 容器会自动 trim 普通空格
+
+**错误示例**:
+
+```vue
+<template>
+  <!-- ❌ 错误：flex 容器中普通空格被 trim -->
+  <div class="flex">
+    {{ t('title.part1') }}{{ t('title.part2') }}
+  </div>
+  <!-- 结果：英文显示为 "HelloWorld" 而非 "Hello World" -->
+</template>
+```
+
+**正确示例**:
+
+```vue
+<template>
+  <!-- ✅ 方案 A：非 flex 容器使用普通空格 -->
+  <div>
+    {{ t('title.part1') }} {{ t('title.part2') }}
+  </div>
+
+  <!-- ✅ 方案 B：flex 容器使用 non-breaking space -->
+  <div class="flex">
+    {{ t('title.part1') }}{{ localeSep }}{{ t('title.part2') }}
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+// 中文无需空格，其他语言使用 \u00a0（non-breaking space）
+const localeSep = computed(() => locale.value === 'zh-CN' ? '' : '\u00a0')
+</script>
+```
+
+**工具检测规则**: 检测 template 中的多个 `{{ t() }}` 拼接，提示添加 `localeSep`
+
+---
+
+## 11. CSS 布局按语言动态调整
+
+**规则**: 长语种（英文/阿拉伯语/西班牙语）需要更宽的布局空间
+
+**原因**: 同样的内容，英文通常比中文长 30-50%，阿拉伯语/西班牙语更长
+
+**错误示例**:
+
+```vue
+<template>
+  <!-- ❌ 错误：固定宽度导致长语种被截断 -->
+  <el-input 
+    :placeholder="t('search.placeholder')" 
+    style="width: 300px"
+  />
+  <!-- 英文 placeholder 被截断 -->
+</template>
+
+<style scoped>
+.label {
+  width: 56px; /* 中文刚好，英文被截断 */
+}
+</style>
+```
+
+**正确示例**:
+
+```vue
+<template>
+  <!-- ✅ 方案 A：使用 computed style 动态调整 -->
+  <el-input 
+    :placeholder="t('search.placeholder')" 
+    :style="searchInputStyle"
+  />
+
+  <!-- ✅ 方案 B：使用动态 class -->
+  <div :class="`label locale-${locale}`">
+    {{ t('field.name') }}
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+
+// 方案 A：computed style
+const searchInputStyle = computed(() => {
+  if (locale.value === 'zh-CN') {
+    return 'width: 300px'
+  }
+  return 'min-width: 300px; max-width: 450px'
+})
+</script>
+
+<style scoped>
+/* 方案 B：动态 class */
+.label {
+  width: 56px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.label.locale-en-US,
+.label.locale-ar-SA,
+.label.locale-es-ES {
+  width: 90px; /* 长语种使用更宽的宽度 */
+}
+</style>
+```
+
+**工具检测规则**: 检测 CSS 中的固定宽度（width: Npx），提示考虑长语种适配
+
+---
+
+## 12. 后端数据多语种处理
+
+**规则**: 后端返回的数据包含语种相关字段时，切换语种需重新请求接口
+
+**原因**: 后端数据（如 displayName、description）可能根据请求头的 locale 返回不同语言
+
+**错误示例**:
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+const menuList = ref([])
+
+onMounted(() => {
+  fetchMenuList() // 只在挂载时请求一次
+})
+
+// ❌ 错误：切换语种后 menuList 中的 displayName 不更新
+</script>
+```
+
+**正确示例**:
+
+```vue
+<script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { locale } = useI18n()
+const menuList = ref([])
+
+const fetchMenuList = async () => {
+  const res = await api.getMenuList({
+    headers: { 'Accept-Language': locale.value }
+  })
+  menuList.value = res.data
+}
+
+onMounted(() => {
+  fetchMenuList()
+})
+
+// ✅ 正确：监听 locale 变化，重新请求接口
+watch(locale, () => {
+  fetchMenuList()
+})
+</script>
+```
+
+**适用场景**:
+- 级联选择器的 displayName
+- 模板列表的 name/description
+- 后端返回的枚举值标签
+
+**工具检测规则**: 检测 API 请求中是否传递 locale 参数，提示需监听 locale 变化
+
+---
+
 ## 工具规则映射
 
-将以上 9 条经验教训映射到工具的检测规则：
+将以上 12 条经验教训映射到工具的检测规则：
 
 | 经验教训 | 工具检测规则名称 | 检测方式 | 严重级别 |
 |----------|------------------|----------|----------|
@@ -368,10 +561,13 @@ t('common.confirm')
 | 3. 静态常量改工厂函数 | `factory-function-sync` | 跨文件分析：检测导出改为函数但导入未更新 | error |
 | 4. JSX 列配置 | `jsx-column-reactive` | AST 分析：检测列配置中的 `t()` 调用未被 `computed` 包裹 | warning |
 | 5. 菜单 key 语义化 | `menu-key-semantic` | 正则匹配：检测 `t(\`menu.${item.name}\`)` 使用中文 name | info |
-| 6. 翻译质量 | `translation-quality` | 规则引擎：检测中式英语、冗余表达、RTL 拼接错误 | warning |
+| 6. 翻译质量 | `translation-quality` | 规则引擎：检测中式英语、冗余表达、RTL 拼接错误、装饰性符号 | warning |
 | 7. 不可转换的中文 | `non-translatable-chinese` | AST + 正则：检测后端 value、图片路径、SVG 中的中文 | warning |
 | 8. 公共翻译统一管理 | `shared-i18n-dedup` | 跨文件分析：检测重复的 key-value，建议提取到 shared-i18n | info |
 | 9. 语种特殊化处理 | `rtl-layout-check` | 模板分析：检测阿语等 RTL 语言缺少 `dir` 属性或 CSS 适配 | warning |
+| 10. 多语言模板拼接空格 | `template-concat-space` | 模板分析：检测多个 `{{ t() }}` 拼接，提示添加 `localeSep` | info |
+| 11. CSS 布局动态调整 | `css-fixed-width` | CSS 分析：检测固定宽度，提示考虑长语种适配 | info |
+| 12. 后端数据多语种 | `api-locale-watch` | AST 分析：检测 API 请求，提示监听 locale 变化 | info |
 
 ---
 

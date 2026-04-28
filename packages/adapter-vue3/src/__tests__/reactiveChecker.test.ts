@@ -110,4 +110,55 @@ const title = $t('common.title')
     expect(issues).toHaveLength(1)
     expect(issues[0].type).toBe('top-level-t-assignment')
   })
+
+  it('应该检测函数 return 数组包含 t()', () => {
+    const source = `<script setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+function useColumns() {
+  return [
+    { title: t('table.name'), dataIndex: 'name' },
+    { title: t('table.age'), dataIndex: 'age' }
+  ]
+}
+</script>`
+
+    const issues = checker.check(source, 'test.vue')
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].type).toBe('jsx-return-with-t')
+    expect(issues[0].suggestion).toContain('computed(() => useXxx())')
+  })
+
+  it('应该检测箭头函数 return 对象包含 t()', () => {
+    const source = `<script setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+const useOptions = () => {
+  return { label: t('common.yes'), value: 1 }
+}
+</script>`
+
+    const issues = checker.check(source, 'test.vue')
+
+    expect(issues).toHaveLength(1)
+    expect(issues[0].type).toBe('jsx-return-with-t')
+  })
+
+  it('不应误报 return computed(() => [...])', () => {
+    const source = `<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+function useColumns() {
+  return computed(() => [
+    { title: t('table.name'), dataIndex: 'name' }
+  ])
+}
+</script>`
+
+    const issues = checker.check(source, 'test.vue')
+
+    expect(issues).toHaveLength(0)
+  })
 })

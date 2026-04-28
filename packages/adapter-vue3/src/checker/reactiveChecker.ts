@@ -31,6 +31,39 @@ function containsTCall(node: any): boolean {
   return false
 }
 
+/** 判断 return 的表达式是否被 computed() 包裹 */
+function isComputedWrapped(argument: any): boolean {
+  if (!argument) return false
+  if (argument.type === 'CallExpression' && argument.callee.type === 'Identifier' && argument.callee.name === 'computed') {
+    return true
+  }
+  return false
+}
+
+/**
+ * 检查函数体中的 return 语句是否包含 t() 调用的数组/对象
+ * 返回找到的问题 return 语句节点列表
+ */
+function findReturnWithTCall(body: any): any[] {
+  const results: any[] = []
+  if (!body || body.type !== 'BlockStatement') return results
+
+  for (const statement of body.body) {
+    if (statement.type !== 'ReturnStatement' || !statement.argument) continue
+    const argument = statement.argument
+
+    // 排除 return computed(() => ...) 的情况
+    if (isComputedWrapped(argument)) continue
+
+    // 检测 return 数组/对象中包含 t()
+    if ((argument.type === 'ArrayExpression' || argument.type === 'ObjectExpression') && containsTCall(argument)) {
+      results.push(statement)
+    }
+  }
+
+  return results
+}
+
 /** 从 AST 节点提取源码片段 */
 function getCodeSnippet(node: any, source: string): string {
   if (node.start != null && node.end != null) {
@@ -144,6 +177,47 @@ export class ReactiveChecker {
             // 这是正确写法，不报告
             continue
           }
+
+          // 规则 4: 箭头函数 return 包含 t() 的数组/对象
+          if (init.type === 'ArrowFunctionExpression') {
+            const returnStatements = findReturnWithTCall(init.body)
+            for (const returnNode of returnStatements) {
+              const returnLine = startLine + (returnNode.loc?.start.line || 1) - 1
+              const returnColumn = returnNode.loc?.start.column || 0
+              const returnCode = getCodeSnippet(returnNode, scriptContent)
+              issues.push({
+                type: 'jsx-return-with-t',
+                filePath,
+                line: returnLine,
+                column: returnColumn,
+                code: returnCode,
+                suggestion: '在调用方使用 computed(() => useXxx()) 包裹',
+              })
+            }
+          }
+        }
+      },
+
+      // 规则 4: 函数声明中 return 包含 t() 的数组/对象
+      FunctionDeclaration(path: any) {
+        // 只检查顶层函数声明
+        if (path.parent.type !== 'Program' && path.parent.type !== 'ExportNamedDeclaration') return
+
+        const functionNode = path.node
+        const returnStatements = findReturnWithTCall(functionNode.body)
+
+        for (const returnNode of returnStatements) {
+          const line = startLine + (returnNode.loc?.start.line || 1) - 1
+          const column = returnNode.loc?.start.column || 0
+          const code = getCodeSnippet(returnNode, scriptContent)
+          issues.push({
+            type: 'jsx-return-with-t',
+            filePath,
+            line,
+            column,
+            code,
+            suggestion: '在调用方使用 computed(() => useXxx()) 包裹',
+          })
         }
       },
     })
