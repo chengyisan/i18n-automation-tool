@@ -185,8 +185,8 @@ export class CacheManager {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    const transaction = this.db.transaction((items: typeof items) => {
-      for (const item of items) {
+    const transaction = this.db.transaction((entries: typeof items) => {
+      for (const item of entries) {
         const key = this.generateKey(
           item.sourceText,
           item.sourceLang,

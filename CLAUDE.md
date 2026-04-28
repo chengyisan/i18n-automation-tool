@@ -140,12 +140,18 @@ docs/
 ├── production-guide.md    # 生产环境实施指南
 ├── lessons-learned.md     # 经验教训（152+ 次提交总结）
 ├── specs/                 # 规格说明文档
-│   └── core/              # core 包的规格文档
-│       ├── ConfigLoader.md
-│       ├── ChineseScanner.md
-│       └── UntranslatableDetector.md
-└── development/           # 开发总结文档
-    └── phase1-summary.md  # Phase 1 开发总结
+│   ├── core/              # core 包的规格文档
+│   │   ├── ConfigLoader.md
+│   │   ├── ChineseScanner.md
+│   │   └── UntranslatableDetector.md
+│   └── adapter-vue3/      # adapter-vue3 包的规格文档
+│       ├── VueSfcParser.md
+│       └── ReactiveChecker.md
+├── analysis/              # 分析报告（从实际项目提炼的问题分析、场景调研）
+│   └── i18n-key-missing-analysis.md
+└── development/           # 开发计划和总结文档
+    ├── phaseN-plan.md     # 阶段计划
+    └── phaseN-summary.md  # 阶段总结
 ```
 
 ### 开发总结规范

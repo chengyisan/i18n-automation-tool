@@ -103,10 +103,22 @@ export interface I18nToolConfig {
   locales: string[]
   defaultLocale: string
   langDir: string
+  /** localeDir 是 langDir 的别名，兼容不同配置风格 */
+  localeDir?: string
   sharedI18nPackage?: string
   exclude: string[]
   keyPrefix: string
   translationService: 'google' | 'deepl' | 'claude' | 'local'
+
+  /** 翻译 API 配置（可选） */
+  translation?: TranslationConfig
+  /** 缓存配置（可选） */
+  cache?: CacheConfig
+  /** 扫描配置（可选） */
+  scan?: {
+    include?: string[]
+    exclude?: string[]
+  }
 
   qualityChecks: {
     chinglish: boolean
@@ -235,7 +247,7 @@ export interface QualityIssue {
 /** 验证问题 */
 export interface ValidationIssue {
   /** 问题类型 */
-  type: 'missing_locale_file' | 'invalid_config' | 'invalid_locale'
+  type: 'missing_locale_file' | 'invalid_config' | 'invalid_locale' | 'missing_translation_key' | 'extra_translation_key'
   /** 严重级别 */
   severity: 'error' | 'warning' | 'info'
   /** 问题描述 */
@@ -244,6 +256,24 @@ export interface ValidationIssue {
   suggestion: string
   /** 文件路径（可选） */
   path?: string
+  /** 语言代码（可选） */
+  locale?: string
+  /** 翻译 key（可选） */
+  key?: string
+}
+
+/** Key 完整性检查结果 */
+export interface KeyIntegrityResult {
+  /** 基准语言 */
+  baseLocale: string
+  /** 所有语言 */
+  locales: string[]
+  /** 基准语言总 key 数 */
+  totalKeys: number
+  /** 问题列表 */
+  issues: ValidationIssue[]
+  /** 各语言统计 */
+  localeStats: Record<string, { missing: number; extra: number; total: number }>
 }
 
 /** 覆盖率报告 */
@@ -285,15 +315,4 @@ export interface LayoutIssue {
   value: string
 }
 
-/** 扫描结果（更新） */
-export interface ScanResult {
-  /** 文件路径 */
-  filePath: string
-  /** 发现的中文字符串 */
-  strings: Array<{
-    text: string
-    position: Position
-    context: 'template' | 'script' | 'style'
-  }>
-}
 

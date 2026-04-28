@@ -45,7 +45,7 @@ export class ConfigValidator {
     const issues: ValidationIssue[] = [];
 
     for (const locale of config.locales) {
-      const localePath = resolve(projectRoot, config.localeDir, `${locale}.json`);
+      const localePath = resolve(projectRoot, config.localeDir || config.langDir, `${locale}.json`);
 
       if (!existsSync(localePath)) {
         issues.push({

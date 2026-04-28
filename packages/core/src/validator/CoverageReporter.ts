@@ -1,5 +1,5 @@
-import type { CoverageReport, I18nToolConfig } from '../types';
-import { ChineseScanner } from '../scanner/ChineseScanner';
+import type { CoverageReport, I18nToolConfig } from '../types.js';
+import { ChineseScanner } from '../scanner/ChineseScanner.js';
 import { readFileSync } from 'fs';
 import { glob } from 'glob';
 import { resolve } from 'path';
@@ -33,9 +33,9 @@ export class CoverageReporter {
     for (const file of files) {
       totalFiles++;
       const content = readFileSync(file, 'utf-8');
-      const scanResult = this.scanner.scan(content, file);
+      const scanResult = this.scanner.scanContent({ content, filePath: file });
 
-      const chineseCount = scanResult.strings.length;
+      const chineseCount = scanResult.hardcodedStrings.length;
       const convertedCount = this.countConvertedStrings(content);
 
       if (chineseCount > 0) {
