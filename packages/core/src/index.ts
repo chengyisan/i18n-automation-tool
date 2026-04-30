@@ -17,6 +17,7 @@ export { CacheManager } from './cache/CacheManager.js'
 export { ChinglishChecker } from './quality/ChinglishChecker.js'
 export { RedundancyChecker } from './quality/RedundancyChecker.js'
 export { RtlChecker } from './quality/RtlChecker.js'
+export { MenuKeyChecker } from './quality/MenuKeyChecker.js'
 
 // 验证
 export { ConfigValidator } from './validator/ConfigValidator.js'
