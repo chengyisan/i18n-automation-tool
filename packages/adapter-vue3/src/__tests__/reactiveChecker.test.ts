@@ -161,4 +161,104 @@ function useColumns() {
 
     expect(issues).toHaveLength(0)
   })
+
+  describe('factory-function-sync', () => {
+    it('应该检测 <script> 中工厂函数调用 useI18n()', () => {
+      const source = `<script>
+function createOptions() {
+  const { t } = useI18n()
+  return [
+    { label: t('common.yes'), value: 1 },
+    { label: t('common.no'), value: 0 }
+  ]
+}
+export default { setup() { return {} } }
+</script>`
+
+      const issues = checker.check(source, 'test.vue')
+
+      const factoryIssues = issues.filter(i => i.type === 'factory-function-sync')
+      expect(factoryIssues).toHaveLength(1)
+      expect(factoryIssues[0].suggestion).toContain('t 作为参数传入')
+    })
+
+    it('应该检测 <script> 中箭头函数使用 t()', () => {
+      const source = `<script>
+const createMenu = () => {
+  return [
+    { label: t('menu.home'), path: '/home' }
+  ]
+}
+export default { setup() { return {} } }
+</script>`
+
+      const issues = checker.check(source, 'test.vue')
+
+      const factoryIssues = issues.filter(i => i.type === 'factory-function-sync')
+      expect(factoryIssues).toHaveLength(1)
+    })
+
+    it('不应报告 <script setup> 中的工厂函数', () => {
+      const source = `<script setup>
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
+function createOptions() {
+  return [
+    { label: t('common.yes'), value: 1 }
+  ]
+}
+</script>`
+
+      const issues = checker.check(source, 'test.vue')
+
+      const factoryIssues = issues.filter(i => i.type === 'factory-function-sync')
+      expect(factoryIssues).toHaveLength(0)
+    })
+
+    it('不应报告接收 t 作为参数的工厂函数', () => {
+      const source = `<script>
+function createOptions(t) {
+  return [
+    { label: t('common.yes'), value: 1 }
+  ]
+}
+export default { setup() { return {} } }
+</script>`
+
+      const issues = checker.check(source, 'test.vue')
+
+      const factoryIssues = issues.filter(i => i.type === 'factory-function-sync')
+      expect(factoryIssues).toHaveLength(0)
+    })
+
+    it('不应报告不使用 i18n 的普通函数', () => {
+      const source = `<script>
+function formatDate(date) {
+  return date.toISOString()
+}
+export default { setup() { return {} } }
+</script>`
+
+      const issues = checker.check(source, 'test.vue')
+
+      const factoryIssues = issues.filter(i => i.type === 'factory-function-sync')
+      expect(factoryIssues).toHaveLength(0)
+    })
+
+    it('应该检测 export function 中的 useI18n 调用', () => {
+      const source = `<script>
+export function useColumns() {
+  const { t } = useI18n()
+  return [
+    { title: t('table.name'), dataIndex: 'name' }
+  ]
+}
+</script>`
+
+      const issues = checker.check(source, 'test.vue')
+
+      const factoryIssues = issues.filter(i => i.type === 'factory-function-sync')
+      expect(factoryIssues).toHaveLength(1)
+    })
+  })
 })

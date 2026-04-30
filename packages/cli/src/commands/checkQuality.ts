@@ -4,6 +4,7 @@ import {
   ChinglishChecker,
   RedundancyChecker,
   RtlChecker,
+  MenuKeyChecker,
 } from '@i18n-tool/core'
 import type { QualityIssue } from '@i18n-tool/core'
 import { loadConfig } from '../utils/loadConfig.js'
@@ -36,6 +37,7 @@ export async function checkQualityCommand(
     const chinglishChecker = new ChinglishChecker()
     const redundancyChecker = new RedundancyChecker()
     const rtlChecker = new RtlChecker()
+    const menuKeyChecker = new MenuKeyChecker()
 
     const allIssues: Array<QualityIssue & { locale: string; key: string }> = []
 
@@ -52,6 +54,12 @@ export async function checkQualityCommand(
       const entries = extractEntries(data)
 
       for (const { key, value } of entries) {
+        // 检查 key 语义化
+        const menuIssues = menuKeyChecker.check(key)
+        for (const issue of menuIssues) {
+          allIssues.push({ ...issue, locale, key })
+        }
+
         if (typeof value !== 'string') continue
 
         const chinglish = chinglishChecker.check(value)

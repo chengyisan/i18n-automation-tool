@@ -228,7 +228,7 @@ export interface CacheConfig {
 /** 质量问题（更新） */
 export interface QualityIssue {
   /** 问题类型 */
-  type: 'chinglish' | 'redundancy' | 'rtl'
+  type: 'chinglish' | 'redundancy' | 'rtl' | 'menu-key-semantic'
   /** 严重级别 */
   severity: 'error' | 'warning' | 'info'
   /** 问题描述 */

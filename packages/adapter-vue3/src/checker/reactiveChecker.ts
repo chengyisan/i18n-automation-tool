@@ -84,12 +84,13 @@ export class ReactiveChecker {
     try {
       const { descriptor } = sfcParse(source, { filename: filePath })
 
-      // 检查 script 块
+      // 检查 script 块（非 setup，需要额外检测工厂函数问题）
       if (descriptor.script) {
         issues.push(...this.checkScript(descriptor.script.content, filePath, descriptor.script.loc.start.line))
+        issues.push(...this.checkFactoryFunctions(descriptor.script.content, filePath, descriptor.script.loc.start.line))
       }
 
-      // 检查 script setup 块
+      // 检查 script setup 块（setup 内部的工厂函数不报告）
       if (descriptor.scriptSetup) {
         issues.push(...this.checkScript(descriptor.scriptSetup.content, filePath, descriptor.scriptSetup.loc.start.line))
       }
@@ -224,5 +225,102 @@ export class ReactiveChecker {
 
     return issues
   }
-}
 
+  /** 检查非 setup script 中的工厂函数同步问题 */
+  private checkFactoryFunctions(
+    scriptContent: string,
+    filePath: string,
+    startLine: number
+  ): ReactiveIssue[] {
+    const issues: ReactiveIssue[] = []
+
+    let ast: any
+    try {
+      ast = babelParse(scriptContent, {
+        sourceType: 'module',
+        plugins: ['typescript', 'jsx'],
+      })
+    } catch {
+      return issues
+    }
+
+    const reportFactoryFunction = (node: any) => {
+      const line = startLine + (node.loc?.start.line || 1) - 1
+      const column = node.loc?.start.column || 0
+      const code = getCodeSnippet(node, scriptContent)
+      issues.push({
+        type: 'factory-function-sync',
+        filePath,
+        line,
+        column,
+        code,
+        suggestion: '避免在 setup 外部调用 useI18n() 或直接使用 t()，改为将 t 作为参数传入函数',
+      })
+    }
+
+    const functionUsesI18n = (functionNode: any): boolean => {
+      // 递归检查节点是否包含 useI18n() 或 t()/$t() 调用
+      const checkNode = (node: any): boolean => {
+        if (!node || typeof node !== 'object') return false
+
+        // 检测 CallExpression
+        if (node.type === 'CallExpression') {
+          const callee = node.callee
+          if (callee.type === 'Identifier') {
+            if (callee.name === 'useI18n' || callee.name === 't' || callee.name === '$t') {
+              return true
+            }
+          }
+        }
+
+        // 递归检查所有子节点
+        for (const key of Object.keys(node)) {
+          if (key === 'type' || key === 'loc' || key === 'start' || key === 'end') continue
+          const child = node[key]
+          if (Array.isArray(child)) {
+            if (child.some((c: any) => c && typeof c === 'object' && checkNode(c))) return true
+          } else if (child && typeof child === 'object' && child.type) {
+            if (checkNode(child)) return true
+          }
+        }
+
+        return false
+      }
+
+      return checkNode(functionNode)
+    }
+
+    /** 检查函数参数中是否包含 t 参数 */
+    const hasTParam = (params: any[]): boolean => {
+      return params.some((p: any) => p.type === 'Identifier' && (p.name === 't' || p.name === '$t'))
+    }
+
+    traverse(ast, {
+      FunctionDeclaration(path: any) {
+        if (path.parent.type !== 'Program' && path.parent.type !== 'ExportNamedDeclaration') return
+        const funcNode = path.node
+        // 如果函数参数中有 t，说明是正确的传参模式
+        if (hasTParam(funcNode.params || [])) return
+        if (functionUsesI18n(funcNode)) {
+          reportFactoryFunction(funcNode)
+        }
+      },
+
+      VariableDeclarator(path: any) {
+        if (path.parentPath.parent.type !== 'Program') return
+
+        const init = path.node.init
+        if (!init) return
+        if (init.type !== 'ArrowFunctionExpression' && init.type !== 'FunctionExpression') return
+
+        // 如果函数参数中有 t，说明是正确的传参模式
+        if (hasTParam(init.params || [])) return
+        if (functionUsesI18n(init)) {
+          reportFactoryFunction(path.node)
+        }
+      },
+    })
+
+    return issues
+  }
+}
