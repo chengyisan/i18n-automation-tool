@@ -1,0 +1,51 @@
+{
+  "locales": ["zh-CN", "en-US"],
+  "defaultLocale": "zh-CN",
+  "langDir": "sample-locale",
+  "exclude": ["**/node_modules/**", "**/dist/**"],
+  "keyPrefix": "test",
+  "translationService": "google",
+  "qualityChecks": {
+    "chinglish": true,
+    "redundantExpressions": true,
+    "rtlConcatenation": true
+  },
+  "reactiveChecks": {
+    "staticObjectWithT": true,
+    "refAssignmentWithT": true
+  },
+  "layoutChecks": {
+    "fixedWidth": true,
+    "tableColumnWidth": true
+  },
+  "untranslatablePatterns": {
+    "backendValues": ["status", "type", "role"],
+    "imageExtensions": [".png", ".jpg", ".svg"],
+    "svgTextNodes": true
+  },
+  "sharedTranslationDetection": {
+    "enabled": true,
+    "minOccurrences": 2,
+    "suggestMerge": true
+  },
+  "security": {
+    "translationMode": "local",
+    "sensitivePatterns": [],
+    "requireApproval": false
+  },
+  "performance": {
+    "parallelScan": {
+      "enabled": false,
+      "maxWorkers": 4
+    },
+    "translationCache": {
+      "enabled": true,
+      "path": ".i18n-cache.db",
+      "ttl": "30d"
+    },
+    "batchTranslation": {
+      "enabled": true,
+      "batchSize": 50
+    }
+  }
+}

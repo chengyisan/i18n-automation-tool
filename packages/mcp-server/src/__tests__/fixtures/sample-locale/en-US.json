@@ -1,0 +1,10 @@
+{
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "page": {
+    "title": "Page Title",
+    "description": "Page Description"
+  }
+}

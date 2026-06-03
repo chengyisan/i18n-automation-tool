@@ -59,3 +59,7 @@ temp/
 .i18n-logs/
 .i18n-reports/
 .i18n-audit.log
+
+# Claude local config (not for version control)
+CLAUDE.local.md
+.claude/
