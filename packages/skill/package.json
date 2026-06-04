@@ -1,22 +1,17 @@
 {
   "name": "@i18n-tool/skill",
   "version": "0.1.0",
-  "description": "i18n 自动化工具 Claude Code Skill",
+  "description": "i18n 自动化工具 Claude Code Skill — slash commands for i18n workflows",
   "type": "module",
-  "main": "dist/index.js",
+  "bin": {
+    "i18n-skill-install": "scripts/install.js"
+  },
+  "files": [
+    "commands/",
+    "scripts/"
+  ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest run",
-    "lint": "eslint src/",
-    "clean": "rm -rf dist"
-  },
-  "dependencies": {
-    "@i18n-tool/core": "workspace:*",
-    "@i18n-tool/adapter-vue3": "workspace:*"
-  },
-  "devDependencies": {
-    "typescript": "^5.4.0",
-    "vitest": "^1.6.0"
+    "build": "echo 'Skill 为 Markdown commands，无需构建'",
+    "install-commands": "node scripts/install.js"
   }
 }
