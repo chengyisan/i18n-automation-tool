@@ -5,8 +5,12 @@ import {
   RedundancyChecker,
   RtlChecker,
   MenuKeyChecker,
+  BackendContractChecker,
+  LocaleConstantChecker,
 } from '@i18n-tool/core'
 import type { QualityIssue } from '@i18n-tool/core'
+import { FragmentedTranslationChecker } from '@i18n-tool/adapter-vue3'
+import type { ReactiveIssue } from '@i18n-tool/adapter-vue3'
 import { loadConfig } from '../utils/loadConfig.js'
 import { logger } from '../utils/logger.js'
 import { spinner } from '../utils/spinner.js'
@@ -38,8 +42,21 @@ export async function checkQualityCommand(
     const redundancyChecker = new RedundancyChecker()
     const rtlChecker = new RtlChecker()
     const menuKeyChecker = new MenuKeyChecker()
+    const fragmentedChecker = new FragmentedTranslationChecker()
+    const backendContractChecker = new BackendContractChecker()
+    const localeConstantChecker = new LocaleConstantChecker()
 
     const allIssues: Array<QualityIssue & { locale: string; key: string }> = []
+    const fragmentedIssues: ReactiveIssue[] = []
+    const backendContractIssues: QualityIssue[] = []
+    const localeConstantIssues: QualityIssue[] = []
+
+    // 扫描 Vue 文件（碎片化翻译拼接检测）
+    const vueFiles = await discoverFiles(projectRoot, ['**/*.vue'], config.scan?.exclude)
+    for (const vueFile of vueFiles) {
+      const content = readFileSync(vueFile, 'utf-8')
+      fragmentedIssues.push(...fragmentedChecker.check(content, vueFile))
+    }
 
     for (const locale of targetLocales) {
       const filePath = resolve(localeDir, `${locale}.json`)
@@ -49,6 +66,9 @@ export async function checkQualityCommand(
       } catch {
         continue
       }
+
+      // 后端约定值检测
+      backendContractIssues.push(...backendContractChecker.check(filePath))
 
       // 递归提取所有翻译文本
       const entries = extractEntries(data)
@@ -72,10 +92,39 @@ export async function checkQualityCommand(
       }
     }
 
+    // 扫描源码文件（默认语言常量检测）
+    const sourceFiles = await discoverFiles(
+      projectRoot,
+      ['**/*.ts', '**/*.js', '**/*.tsx', '**/*.jsx'],
+      [...(config.scan?.exclude || []), '**/node_modules/**', '**/dist/**', '**/.git/**']
+    )
+    for (const sourceFile of sourceFiles) {
+      const content = readFileSync(sourceFile, 'utf-8')
+      localeConstantIssues.push(...localeConstantChecker.check(sourceFile, content))
+    }
+
     sp.succeed('质量检查完成')
 
+    const totalIssues =
+      allIssues.length +
+      fragmentedIssues.length +
+      backendContractIssues.length +
+      localeConstantIssues.length
+
     if (options.json) {
-      console.log(JSON.stringify({ issues: allIssues, total: allIssues.length }, null, 2))
+      console.log(
+        JSON.stringify(
+          {
+            issues: allIssues,
+            fragmentedTranslation: fragmentedIssues,
+            backendContract: backendContractIssues,
+            localeConstant: localeConstantIssues,
+            total: totalIssues,
+          },
+          null,
+          2
+        )
+      )
     } else {
       if (allIssues.length > 0) {
         logger.warn(`发现 ${allIssues.length} 个质量问题`)
@@ -99,6 +148,44 @@ export async function checkQualityCommand(
         }
       } else {
         logger.success('翻译质量良好')
+      }
+
+      // 新增问题输出
+      if (fragmentedIssues.length > 0) {
+        logger.warn(`\n碎片化翻译拼接: ${fragmentedIssues.length} 个`)
+        for (const issue of fragmentedIssues.slice(0, 10)) {
+          console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
+          console.log(`    ${issue.suggestion}`)
+        }
+        if (fragmentedIssues.length > 10) {
+          console.log(`  ... 还有 ${fragmentedIssues.length - 10} 个问题`)
+        }
+      }
+
+      if (backendContractIssues.length > 0) {
+        logger.warn(`\n后端约定值: ${backendContractIssues.length} 个`)
+        for (const issue of backendContractIssues.slice(0, 10)) {
+          console.log(`  ${issue.context}`)
+          console.log(`    ${issue.suggestion}`)
+        }
+        if (backendContractIssues.length > 10) {
+          console.log(`  ... 还有 ${backendContractIssues.length - 10} 个问题`)
+        }
+      }
+
+      if (localeConstantIssues.length > 0) {
+        logger.warn(`\n默认语言硬编码: ${localeConstantIssues.length} 个`)
+        for (const issue of localeConstantIssues.slice(0, 10)) {
+          console.log(`  ${issue.context}`)
+          console.log(`    ${issue.suggestion}`)
+        }
+        if (localeConstantIssues.length > 10) {
+          console.log(`  ... 还有 ${localeConstantIssues.length - 10} 个问题`)
+        }
+      }
+
+      if (totalIssues > 0) {
+        logger.warn(`\n总计: ${totalIssues} 个问题`)
       }
     }
 
