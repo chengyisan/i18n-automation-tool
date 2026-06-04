@@ -60,7 +60,7 @@ export interface ReplacementResult {
 /** 响应式问题 */
 export interface ReactiveIssue {
   /** 问题类型 */
-  type: 'ref-with-t' | 'static-object-with-t' | 'top-level-t-assignment' | 'jsx-return-with-t' | 'factory-function-sync' | 'api-locale-watch'
+  type: 'ref-with-t' | 'static-object-with-t' | 'top-level-t-assignment' | 'jsx-return-with-t' | 'factory-function-sync' | 'api-locale-watch' | 'fragmented-translation'
   /** 文件路径 */
   filePath: string
   /** 行号 */

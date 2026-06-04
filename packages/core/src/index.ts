@@ -18,6 +18,8 @@ export { ChinglishChecker } from './quality/ChinglishChecker.js'
 export { RedundancyChecker } from './quality/RedundancyChecker.js'
 export { RtlChecker } from './quality/RtlChecker.js'
 export { MenuKeyChecker } from './quality/MenuKeyChecker.js'
+export { BackendContractChecker } from './quality/BackendContractChecker.js'
+export { LocaleConstantChecker } from './quality/LocaleConstantChecker.js'
 
 // 验证
 export { ConfigValidator } from './validator/ConfigValidator.js'
