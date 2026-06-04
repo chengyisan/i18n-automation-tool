@@ -9,6 +9,8 @@ import { checkReactiveCommand } from './commands/checkReactive.js'
 import { checkQualityCommand } from './commands/checkQuality.js'
 import { checkLayoutCommand } from './commands/checkLayout.js'
 import { initCommand } from './commands/init.js'
+import { fixCommand } from './commands/fix.js'
+import { translateCommand } from './commands/translate.js'
 
 const pkg = JSON.parse(
   readFileSync(resolve(import.meta.dirname, '..', 'package.json'), 'utf-8')
@@ -46,6 +48,23 @@ program
   .description('检查 t() 响应式问题')
   .option('--json', '以 JSON 格式输出')
   .action(checkReactiveCommand)
+
+program
+  .command('fix [path]')
+  .description('交互式修复硬编码中文，替换为 t() 调用')
+  .option('--dry-run', '预览模式，不实际写入文件')
+  .option('--auto', '自动批量替换，跳过确认')
+  .option('--file <path>', '只处理指定文件')
+  .option('--json', '以 JSON 格式输出')
+  .action(fixCommand)
+
+program
+  .command('translate [path]')
+  .description('批量翻译语言包')
+  .option('--locale <code>', '只翻译指定语言')
+  .option('--dry-run', '预览模式，不实际写入文件')
+  .option('--json', '以 JSON 格式输出')
+  .action(translateCommand)
 
 // PLACEHOLDER_CLI_COMMANDS
 
