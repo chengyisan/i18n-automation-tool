@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
-import { ReactiveChecker, TemplateConcatChecker } from '@i18n-tool/adapter-vue3'
+import { ReactiveChecker, TemplateConcatChecker, ApiLocaleChecker } from '@i18n-tool/adapter-vue3'
 import { loadConfig } from '../utils/loadConfig.js'
 import { logger } from '../utils/logger.js'
 import { spinner } from '../utils/spinner.js'
@@ -25,22 +25,25 @@ export async function checkReactiveCommand(
 
     const reactiveChecker = new ReactiveChecker()
     const concatChecker = new TemplateConcatChecker()
+    const apiLocaleChecker = new ApiLocaleChecker()
     const reactiveIssues: any[] = []
     const concatIssues: any[] = []
+    const apiLocaleIssues: any[] = []
 
     for (const file of files) {
       const content = readFileSync(file, 'utf-8')
       reactiveIssues.push(...reactiveChecker.check(content, file))
       concatIssues.push(...concatChecker.check(content, file))
+      apiLocaleIssues.push(...apiLocaleChecker.check(content, file))
     }
 
     sp.succeed('检查完成')
 
-    const totalIssues = reactiveIssues.length + concatIssues.length
+    const totalIssues = reactiveIssues.length + concatIssues.length + apiLocaleIssues.length
 
     if (options.json) {
       console.log(
-        JSON.stringify({ reactiveIssues, concatIssues, total: totalIssues }, null, 2)
+        JSON.stringify({ reactiveIssues, concatIssues, apiLocaleIssues, total: totalIssues }, null, 2)
       )
     } else {
       logger.info(`扫描了 ${files.length} 个 Vue 文件`)
@@ -56,6 +59,14 @@ export async function checkReactiveCommand(
       if (concatIssues.length > 0) {
         logger.warn(`模板拼接问题: ${concatIssues.length} 个`)
         for (const issue of concatIssues) {
+          console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
+          console.log(`    ${issue.suggestion}`)
+        }
+      }
+
+      if (apiLocaleIssues.length > 0) {
+        logger.warn(`API locale 监听问题: ${apiLocaleIssues.length} 个`)
+        for (const issue of apiLocaleIssues) {
           console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
           console.log(`    ${issue.suggestion}`)
         }
