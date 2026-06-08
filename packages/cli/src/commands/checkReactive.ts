@@ -1,6 +1,12 @@
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
-import { ReactiveChecker, TemplateConcatChecker, ApiLocaleChecker } from '@i18n-tool/adapter-vue3'
+import {
+  ReactiveChecker,
+  TemplateConcatChecker,
+  ApiLocaleChecker,
+  SseWsLocaleChecker,
+  CachedRefLocaleChecker,
+} from '@i18n-tool/adapter-vue3'
 import { loadConfig } from '../utils/loadConfig.js'
 import { logger } from '../utils/logger.js'
 import { spinner } from '../utils/spinner.js'
@@ -26,24 +32,46 @@ export async function checkReactiveCommand(
     const reactiveChecker = new ReactiveChecker()
     const concatChecker = new TemplateConcatChecker()
     const apiLocaleChecker = new ApiLocaleChecker()
+    const sseWsChecker = new SseWsLocaleChecker()
+    const cachedRefChecker = new CachedRefLocaleChecker()
     const reactiveIssues: any[] = []
     const concatIssues: any[] = []
     const apiLocaleIssues: any[] = []
+    const sseWsIssues: any[] = []
+    const cachedRefIssues: any[] = []
 
     for (const file of files) {
       const content = readFileSync(file, 'utf-8')
       reactiveIssues.push(...reactiveChecker.check(content, file))
       concatIssues.push(...concatChecker.check(content, file))
       apiLocaleIssues.push(...apiLocaleChecker.check(content, file))
+      sseWsIssues.push(...sseWsChecker.check(content, file))
+      cachedRefIssues.push(...cachedRefChecker.check(content, file))
     }
 
     sp.succeed('检查完成')
 
-    const totalIssues = reactiveIssues.length + concatIssues.length + apiLocaleIssues.length
+    const totalIssues =
+      reactiveIssues.length +
+      concatIssues.length +
+      apiLocaleIssues.length +
+      sseWsIssues.length +
+      cachedRefIssues.length
 
     if (options.json) {
       console.log(
-        JSON.stringify({ reactiveIssues, concatIssues, apiLocaleIssues, total: totalIssues }, null, 2)
+        JSON.stringify(
+          {
+            reactiveIssues,
+            concatIssues,
+            apiLocaleIssues,
+            sseWsLocaleIssues: sseWsIssues,
+            cachedRefLocaleIssues: cachedRefIssues,
+            total: totalIssues,
+          },
+          null,
+          2
+        )
       )
     } else {
       logger.info(`扫描了 ${files.length} 个 Vue 文件`)
@@ -67,6 +95,22 @@ export async function checkReactiveCommand(
       if (apiLocaleIssues.length > 0) {
         logger.warn(`API locale 监听问题: ${apiLocaleIssues.length} 个`)
         for (const issue of apiLocaleIssues) {
+          console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
+          console.log(`    ${issue.suggestion}`)
+        }
+      }
+
+      if (sseWsIssues.length > 0) {
+        logger.warn(`SSE/WebSocket 语言参数缺失: ${sseWsIssues.length} 个`)
+        for (const issue of sseWsIssues) {
+          console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
+          console.log(`    ${issue.suggestion}`)
+        }
+      }
+
+      if (cachedRefIssues.length > 0) {
+        logger.warn(`缓存 ref 响应式问题: ${cachedRefIssues.length} 个`)
+        for (const issue of cachedRefIssues) {
           console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
           console.log(`    ${issue.suggestion}`)
         }

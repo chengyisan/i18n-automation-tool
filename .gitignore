@@ -55,6 +55,9 @@ tmp/
 temp/
 *.tmp
 
+# CLI test temporary outputs
+packages/cli/.test-cli-*/
+
 # Logs and reports
 .i18n-logs/
 .i18n-reports/
