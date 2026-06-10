@@ -100,3 +100,33 @@ export interface TemplateConcatIssue {
   /** 修复建议 */
   suggestion: string
 }
+
+/** 图片资源多语言问题 */
+export interface ImageI18nIssue {
+  /** 问题类型 */
+  type: 'image-i18n-missing'
+  /** 文件路径 */
+  filePath: string
+  /** 行号 */
+  line: number
+  /** 问题代码 */
+  code: string
+  /** 修复建议 */
+  suggestion: string
+}
+
+/** 表单 maxlength 固定值问题 */
+export interface MaxlengthIssue {
+  /** 问题类型 */
+  type: 'maxlength-fixed'
+  /** 文件路径 */
+  filePath: string
+  /** 行号 */
+  line: number
+  /** 问题代码 */
+  code: string
+  /** 当前固定值 */
+  currentValue: number
+  /** 修复建议 */
+  suggestion: string
+}

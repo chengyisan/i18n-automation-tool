@@ -6,6 +6,8 @@ import {
   ApiLocaleChecker,
   SseWsLocaleChecker,
   CachedRefLocaleChecker,
+  ImageI18nChecker,
+  MaxlengthChecker,
 } from '@i18n-tool/adapter-vue3'
 import { loadConfig } from '../utils/loadConfig.js'
 import { logger } from '../utils/logger.js'
@@ -34,11 +36,15 @@ export async function checkReactiveCommand(
     const apiLocaleChecker = new ApiLocaleChecker()
     const sseWsChecker = new SseWsLocaleChecker()
     const cachedRefChecker = new CachedRefLocaleChecker()
+    const imageChecker = new ImageI18nChecker()
+    const maxlengthChecker = new MaxlengthChecker()
     const reactiveIssues: any[] = []
     const concatIssues: any[] = []
     const apiLocaleIssues: any[] = []
     const sseWsIssues: any[] = []
     const cachedRefIssues: any[] = []
+    const imageIssues: any[] = []
+    const maxlengthIssues: any[] = []
 
     for (const file of files) {
       const content = readFileSync(file, 'utf-8')
@@ -47,6 +53,8 @@ export async function checkReactiveCommand(
       apiLocaleIssues.push(...apiLocaleChecker.check(content, file))
       sseWsIssues.push(...sseWsChecker.check(content, file))
       cachedRefIssues.push(...cachedRefChecker.check(content, file))
+      imageIssues.push(...imageChecker.check(content, file))
+      maxlengthIssues.push(...maxlengthChecker.check(content, file))
     }
 
     sp.succeed('检查完成')
@@ -56,7 +64,9 @@ export async function checkReactiveCommand(
       concatIssues.length +
       apiLocaleIssues.length +
       sseWsIssues.length +
-      cachedRefIssues.length
+      cachedRefIssues.length +
+      imageIssues.length +
+      maxlengthIssues.length
 
     if (options.json) {
       console.log(
@@ -67,6 +77,8 @@ export async function checkReactiveCommand(
             apiLocaleIssues,
             sseWsLocaleIssues: sseWsIssues,
             cachedRefLocaleIssues: cachedRefIssues,
+            imageI18nIssues: imageIssues,
+            maxlengthIssues: maxlengthIssues,
             total: totalIssues,
           },
           null,
@@ -111,6 +123,22 @@ export async function checkReactiveCommand(
       if (cachedRefIssues.length > 0) {
         logger.warn(`缓存 ref 响应式问题: ${cachedRefIssues.length} 个`)
         for (const issue of cachedRefIssues) {
+          console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
+          console.log(`    ${issue.suggestion}`)
+        }
+      }
+
+      if (imageIssues.length > 0) {
+        logger.warn(`含中文图片资源未多语言化: ${imageIssues.length} 个`)
+        for (const issue of imageIssues) {
+          console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
+          console.log(`    ${issue.suggestion}`)
+        }
+      }
+
+      if (maxlengthIssues.length > 0) {
+        logger.warn(`表单 maxlength 未按语种适配: ${maxlengthIssues.length} 个`)
+        for (const issue of maxlengthIssues) {
           console.log(`  ${issue.filePath}:${issue.line} [${issue.type}]`)
           console.log(`    ${issue.suggestion}`)
         }
